@@ -1,5 +1,5 @@
 baseURL: https://hallcdcs550.netlify.app/
-title: Your title
+title: Charlie's test blog for DCS 550
 theme: hugo-theme-m10c
 paginate: 8
 menu:
@@ -18,12 +18,12 @@ menu:
       weight: 3
 params:
   author: John Doe
-  description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+  description: This is my description of my site.
   menu_item_separator: ' - '
   social:
     - icon: github
       name: Github
-      url: https://github.com/gohugoio
+      url: https://github.com/hallc-14
     - icon: twitter
       name: Twitter
       url: https://twitter.com/gohugoio
