@@ -1,0 +1,23 @@
+---
+title: Quiz (2) Final Project Topic
+author: 'Charlie H.'
+date: '2021-05-20'
+slug: []
+categories: ['Final Project']
+tags: ['Final Project']
+---
+
+### **Final Project Proposal**
+
+**Question 1:** *What particular research questions would you like to answer in your final project report?*
+
+My topic for the final project is the ecology of the area around Mt. St. Helens. I would like to investigate how the eruption of 1980 directly impacted the area and how vegetation has been restored and wildlife re-inhabited over time. I may also map out the immediate area to determine the extent of the volcano’s destruction and visualize the recovery.
+
+**Question 2:** *What sources do you think you can utilize to create your own data sets to answer your research questions listed in Q.1 for the final report?*
+
+- [Vegetation Recovery Dataset](https://ecologicaldata.org/wiki/vegetation-mount-st-helens)
+- [Article on Vegetation Recovery](https://www.researchgate.net/publication/240777594_Thirty_years_of_permanent_vegetation_plots_Mount_St_Helens_Washington_USA_Ecological_Archives_E091-152)
+- [Images and Maps](https://storymaps.arcgis.com/stories/43b9356f42be4052ba1e7e87ec822c20)
+- [Photographic Database](https://content.lib.washington.edu/mtsthelensweb/index.html)
+- [Ecological Research at Mt. St. Helens](https://www.fs.usda.gov/pnw/projects/mount-st-helens)
+- [Large Collection of Various Datasets](https://labs.wsu.edu/john-bishop/26-2/)
