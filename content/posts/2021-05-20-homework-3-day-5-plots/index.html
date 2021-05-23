@@ -3,11 +3,340 @@ title: Homework (3) Day 5 Plots
 author: ''
 date: '2021-05-20'
 slug: []
-categories: []
-tags: []
+categories: ['Lecture Notes']
+tags: ['Plots','Data Visualization']
 ---
 
 
 
-<p>Replicate plots from yesterday’s lecture (5/20/21)</p>
-<p>Due Wednesday</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<div id="annotations" class="section level3">
+<h3>Annotations</h3>
+<p><strong>Slide 3</strong></p>
+<pre class="r"><code>presidential &lt;- subset(presidential, start &gt; economics$date[1])
+
+plot6 &lt;- economics %&gt;% ggplot() + 
+  geom_line(aes(date, unemploy))
+
+plot(plot6)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong>Slide 4</strong></p>
+<pre class="r"><code>plot7 &lt;- plot6 + 
+  geom_rect(aes(xmin = start, xmax = end, fill = party),
+            ymin = -Inf, ymax = Inf, alpha = .2,
+            data = presidential)
+
+plot(plot7)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><strong>Slide 5</strong></p>
+<pre class="r"><code>plot8 &lt;- plot7 + geom_vline( aes(xintercept = as.numeric(start)),
+                       data = presidential, 
+                       color = &#39;grey50&#39;, alpha = .5)
+
+plot(plot8)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><strong>Slide 6</strong></p>
+<pre class="r"><code>plot9 &lt;- plot8 + geom_text(aes(x = start, y = 2500, label = name),
+                           data = presidential, 
+                           size = 3, vjust = 0, hjust = 0, nudge_x = 50)
+
+plot(plot9)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><strong>Slide 7</strong></p>
+<pre class="r"><code>plot10 &lt;- plot9 + scale_fill_manual(values = c(&#39;blue&#39;,&#39;red&#39;)) +
+  xlab(&#39;date&#39;) + ylab(&#39;unemployment&#39;)
+
+plot(plot10)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><strong>Slide 8</strong></p>
+<pre class="r"><code>p &lt;- ggplot(mpg, aes(displ, hwy)) +
+  geom_point(data = filter(mpg, manufacturer == &#39;subaru&#39;),
+             color = &#39;orange&#39;,
+             size = 3) +
+  geom_point()
+
+print(p)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><strong>Slide 9</strong></p>
+<pre class="r"><code>p + annotate(geom = &#39;point&#39;, x = 5.5, y = 40, color = &#39;orange&#39;, size = 3) +
+    annotate(geom = &#39;point&#39;, x = 5.5, y = 40) +
+    annotate(geom = &#39;text&#39;, x = 5.6, y = 40, label = &#39;subaru&#39;, hjust = &#39;left&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><strong>Slide 10</strong></p>
+<pre class="r"><code>p + annotate(geom = &#39;curve&#39;, x = 4, y = 35, xend = 2.65, yend = 27,
+             curvature = .3, arrow = arrow(length = unit(2, &#39;mm&#39;))) +
+  annotate(geom = &#39;text&#39;, x = 4.1, y = 35, label = &#39;subaru&#39;, hjust = &#39;left&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="direct-labeling" class="section level3">
+<h3>Direct Labeling</h3>
+<p><strong>Slide 11</strong></p>
+<pre class="r"><code>ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><strong>Slide 12</strong></p>
+<pre class="r"><code>library(directlabels)
+
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point(show.legend = FALSE) +
+  geom_dl(aes(label = class), method = &#39;smart.grid&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><strong>Slide 13</strong></p>
+<pre class="r"><code>library(ggforce)</code></pre>
+<pre><code>## Warning: package &#39;ggforce&#39; was built under R version 4.0.5</code></pre>
+<pre class="r"><code>mpg %&gt;% ggplot(aes(displ, hwy)) +
+  geom_point() +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Theme Options:</p>
+<p><code>theme_gray(): default, theme_bw(), theme_linedraw(), theme_light, theme_dark(), theme_class(), theme_void()</code></p>
+<p><strong>Slide 14</strong></p>
+<pre class="r"><code>mpg %&gt;% ggplot(aes(displ, hwy)) +
+  geom_point() +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1, 7.2) + ylim(9,46) +
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+Display Cylinder by Color (Charlie):</p>
+<pre class="r"><code>mpg %&gt;% ggplot(aes(displ, hwy)) +
+  geom_point(aes(color = factor(cyl))) +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1, 7.2) + ylim(9, 46) +
+  labs(color = &#39;cylinder&#39;) +
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><strong>Slide 15</strong></p>
+<p>Display Cylinder by Color (Dr. Sihm):</p>
+<pre class="r"><code>mpg %&gt;% ggplot(aes(displ, hwy)) +
+  geom_point(aes(color = factor(cyl)), show.legend = FALSE) +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1,7.2) + ylim(9, 46) +
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+</div>
+<div id="how-to-remove-legend" class="section level3">
+<h3>How to Remove Legend</h3>
+<p><strong>Slide 16</strong></p>
+<ul>
+<li>Remove legend title only</li>
+</ul>
+<p><code>p + theme(legend.title = element_black())</code></p>
+<ul>
+<li>Hide legend for specific geometry only</li>
+</ul>
+<p><code>p + geom_yOuR_cHoIcE(aes(color = vAr_nAmE), show.legend = FALSE)</code></p>
+<ul>
+<li>Hide entire legend</li>
+</ul>
+<p><code>p + theme(legend.position = 'none')</code></p>
+<p><strong>Slide 17</strong></p>
+<pre class="r"><code>library(gghighlight)
+data(Oxboys, package = &#39;nlme&#39;)
+
+Oxboys %&gt;% ggplot(aes(age, height, group = Subject)) +
+  geom_line() +
+  geom_point() +
+  gghighlight(Subject %in% 1:3)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+</div>
+<div id="annotations-across-facets" class="section level3">
+<h3>Annotations Across Facets</h3>
+<p><strong>Slide 18</strong></p>
+<pre class="r"><code>diamonds %&gt;% ggplot(aes(log10(carat), log10(price))) +
+  geom_bin2d() +
+  facet_wrap(~cut, nrow = 1)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><strong>Slide 19</strong></p>
+<ul>
+<li>First, have y-int and slope of trend line over entire dataset</li>
+</ul>
+<pre class="r"><code>linear_model &lt;- lm(log10(price) ~ log10(carat), data = diamonds)
+coef_values &lt;- coef(linear_model)</code></pre>
+<ul>
+<li>Add this line to all plots across facets. Now we have shared ref. line</li>
+</ul>
+<pre class="r"><code>diamonds %&gt;% ggplot(aes(log10(carat), log10(price))) +
+  geom_bin2d() +
+  geom_abline(intercept = coef_values[1], slope = coef_values[2], 
+              color = &#39;white&#39;, size = .7) +
+  facet_wrap(~cut, nrow = 1)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><strong>Slide 20</strong></p>
+<pre class="r"><code>mpg %&gt;% ggplot(aes(displ, hwy, color = factor(cyl))) + 
+  geom_point() +
+  gghighlight() +
+  facet_wrap(~cyl, ncol = 1)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+<div id="arranging-plots-side-by-side" class="section level3">
+<h3>Arranging Plots Side by Side</h3>
+<p><strong>Slide 21</strong></p>
+<ul>
+<li>Create the following 4 plots</li>
+</ul>
+<pre class="r"><code>plot_1 &lt;- mpg %&gt;% ggplot() + geom_point(aes(x = displ, y = hwy))
+
+plot(plot_1)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><strong>Slide 22</strong></p>
+<pre class="r"><code>plot_2 &lt;- mpg %&gt;% ggplot() + geom_bar(aes(x = as.character(year),
+                                          fill = drv),
+                                      position = &#39;dodge&#39;) + xlab(&#39;year&#39;)
+
+plot(plot_2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><strong>Slide 23</strong></p>
+<pre class="r"><code>plot_3 &lt;- mpg %&gt;% ggplot() +
+  geom_density(aes(x = hwy, fill = drv), color = NA) +
+  facet_wrap(~drv, ncol = 1) # Removing black lines
+
+plot(plot_3)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><strong>Slide 24</strong></p>
+<pre class="r"><code>plot_4 &lt;- mpg %&gt;% ggplot() + stat_summary(aes(drv, hwy, fill = drv),
+                                          geom = &#39;col&#39;, fun.data = mean_se) +
+  stat_summary(aes(drv, hwy), geom = &#39;errorbar&#39;, fun.data = mean_se, width=.5)
+
+plot(plot_4)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p><strong>Slide 25</strong></p>
+<pre class="r"><code>library(patchwork)</code></pre>
+<pre><code>## Warning: package &#39;patchwork&#39; was built under R version 4.0.5</code></pre>
+<pre class="r"><code>plot_1 + plot_2</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><strong>Slide 26</strong></p>
+<pre class="r"><code>plot(plot_1 + plot_2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p><strong>Slide 27</strong></p>
+<ul>
+<li>Adding 3 plots will generated 1x3 grid (same default rules as <code>facet_wrap()</code>)</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_2 + plot_3</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p><strong>Slide 28</strong></p>
+<ul>
+<li>Adding 4 plots will generate 2x2</li>
+<li>Notice patchwork handles alignments automatically</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_2 + plot_3 + plot_4</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p><strong>Slide 29</strong></p>
+<pre class="r"><code>plot_1 + plot_2 + plot_3 + plot_layout(ncol = 2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p><strong>Slide 30</strong></p>
+<pre class="r"><code>plot_1/plot_2</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p><strong>Slide 31</strong></p>
+<pre class="r"><code>plot_1 | plot_2</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p><strong>Slide 32</strong></p>
+<pre class="r"><code>plot_3 | (plot_2/ (plot_1 | plot_4))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p><strong>Slide 33</strong></p>
+<pre class="r"><code>layout_1 &lt;- &#39;
+AAB
+C#B
+CDD
+&#39;
+
+plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(design = layout_1)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p><strong>Slide 34</strong></p>
+<ul>
+<li>We can put all legends into one place. Redudant ones will be dropped.</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(design = layout_1,
+                                                guides = &#39;collect&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p><strong>Slide 35</strong></p>
+<ul>
+<li>Using <code>guide_area()</code>, we can put guides in an empty area</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_2 + plot_3 + guide_area() + plot_layout(ncol = 2, guides = &#39;collect&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p><strong>Slide 36</strong></p>
+<ul>
+<li>Modifying subplots</li>
+</ul>
+<pre class="r"><code>plot_1_2 &lt;- plot_1 + plot_2
+plot_1_2[[1]] &lt;- plot_1_2[[1]] + theme_dark()
+plot_1_2[[2]] &lt;- plot_1_2[[2]] + theme_classic()
+plot_1_2</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p><strong>Slide 37</strong></p>
+<ul>
+<li>Assigning common theme in patchwork by &amp;</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_4 &amp; theme_minimal() # apply GGplot layers with &amp; sign</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><strong>Slide 38</strong></p>
+<ul>
+<li>Assign common y-axis in patchwork by &amp;</li>
+</ul>
+<pre class="r"><code>plot_1 + plot_4 &amp; scale_y_continuous(limits = c(0,45))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<p><strong>Slide 39</strong></p>
+<ul>
+<li>Add annotation using <code>plot_annotation()</code></li>
+</ul>
+<pre class="r"><code>plot_3_4 &lt;- plot_3 + plot_4 + plot_annotation(
+  title = &#39;A closer look at effect of drive train in cars&#39;,
+  caption = &#39;Source: mpg dataset in ggplot2&#39;
+)
+
+plot_3_4</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p><strong>Slide 40</strong></p>
+<pre class="r"><code>plot_3_4 + plot_annotation(theme = theme_gray(base_family = &#39;mono&#39;))</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p><strong>Slide 41</strong></p>
+<pre class="r"><code>plot_3_4 &amp; theme_gray(base_family = &#39;mono&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+<p><strong>Slide 42</strong></p>
+<ul>
+<li>Tagging each plot (common in sci. lit.)</li>
+</ul>
+<pre class="r"><code>plot_1_2_3 &lt;- plot_1 | (plot_2 / plot_3)
+plot_1_2_3 + plot_annotation(tag_levels = &#39;I&#39;) # uppercase Roman Numerals</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<p><strong>Slide 43</strong></p>
+<ul>
+<li>Use nesting to define new tagging levels.</li>
+</ul>
+<pre class="r"><code>plot_1_2_3[[2]] &lt;- plot_1_2_3[[2]]+ plot_layout(tag_level = &#39;new&#39;)
+plot_1_2_3 + plot_annotation(tag_levels = c(&#39;I&#39;, &#39;a&#39;)) </code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<pre class="r"><code># uppercase rom numeral, then lowercase alphabet</code></pre>
+<p><strong>Slide 44</strong></p>
+<ul>
+<li>Use <code>inset_element()</code></li>
+</ul>
+<pre class="r"><code>plot_1 + inset_element(plot_2, left = .5, bottom = .4,
+                       right = .9, top = .95)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+<pre class="r"><code># `npc`: Normalized Parent Coordinate
+# relative unit 0 to 1</code></pre>
+<p><strong>Slide 45</strong></p>
+<ul>
+<li>Use different unit with <code>inset_element()</code></li>
+</ul>
+<pre class="r"><code>plot_1_2_a &lt;- plot_1 + inset_element(plot_2, left = .5, bottom = .4,
+                                     right = unit(1, &#39;npc&#39;) - unit(5, &#39;mm&#39;),
+                                     top = unit(1, &#39;npc&#39;) - unit(3, &#39;mm&#39;),
+                                     align_to = &#39;full&#39;)
+plot(plot_1_2_a)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<p><strong>Slide 46</strong></p>
+<ul>
+<li>Change theme using &amp; likewise</li>
+</ul>
+<pre class="r"><code>plot_1_2_a &amp; theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p><strong>Slide 47</strong></p>
+<ul>
+<li>Tagging works as expected</li>
+</ul>
+<pre class="r"><code>plot_1_2_a + plot_annotation(tag_levels = &#39;A&#39;) &amp; theme_dark()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+</div>

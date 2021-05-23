@@ -3,10 +3,419 @@ title: Homework (3) Day 5 Plots
 author: ''
 date: '2021-05-20'
 slug: []
-categories: []
-tags: []
+categories: ['Lecture Notes']
+tags: ['Plots','Data Visualization']
 ---
 
-Replicate plots from yesterday's lecture (5/20/21)
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+```
 
-Due Wednesday
+### Annotations
+
+**Slide 3**
+```{r}
+presidential <- subset(presidential, start > economics$date[1])
+
+plot6 <- economics %>% ggplot() + 
+  geom_line(aes(date, unemploy))
+
+plot(plot6)
+
+```
+
+**Slide 4**
+```{r}
+plot7 <- plot6 + 
+  geom_rect(aes(xmin = start, xmax = end, fill = party),
+            ymin = -Inf, ymax = Inf, alpha = .2,
+            data = presidential)
+
+plot(plot7)
+```
+
+**Slide 5**
+```{r}
+plot8 <- plot7 + geom_vline( aes(xintercept = as.numeric(start)),
+                       data = presidential, 
+                       color = 'grey50', alpha = .5)
+
+plot(plot8)
+```
+
+**Slide 6**
+```{r}
+plot9 <- plot8 + geom_text(aes(x = start, y = 2500, label = name),
+                           data = presidential, 
+                           size = 3, vjust = 0, hjust = 0, nudge_x = 50)
+
+plot(plot9)
+```
+
+**Slide 7**
+```{r}
+plot10 <- plot9 + scale_fill_manual(values = c('blue','red')) +
+  xlab('date') + ylab('unemployment')
+
+plot(plot10)
+```
+
+**Slide 8**
+```{r}
+p <- ggplot(mpg, aes(displ, hwy)) +
+  geom_point(data = filter(mpg, manufacturer == 'subaru'),
+             color = 'orange',
+             size = 3) +
+  geom_point()
+
+print(p)
+```
+
+**Slide 9**
+```{r}
+p + annotate(geom = 'point', x = 5.5, y = 40, color = 'orange', size = 3) +
+    annotate(geom = 'point', x = 5.5, y = 40) +
+    annotate(geom = 'text', x = 5.6, y = 40, label = 'subaru', hjust = 'left')
+```  
+
+**Slide 10**
+```{r}
+p + annotate(geom = 'curve', x = 4, y = 35, xend = 2.65, yend = 27,
+             curvature = .3, arrow = arrow(length = unit(2, 'mm'))) +
+  annotate(geom = 'text', x = 4.1, y = 35, label = 'subaru', hjust = 'left')
+```
+
+### Direct Labeling
+
+**Slide 11**
+```{r}
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point()
+```
+
+**Slide 12**
+```{r, message = FALSE, warning = FALSE}
+library(directlabels)
+
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point(show.legend = FALSE) +
+  geom_dl(aes(label = class), method = 'smart.grid')
+```
+
+**Slide 13**
+```{r, message = FALSE}
+library(ggforce)
+
+mpg %>% ggplot(aes(displ, hwy)) +
+  geom_point() +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  theme_minimal()
+
+```
+
+Theme Options:
+
+`theme_gray(): default, theme_bw(), theme_linedraw(), theme_light, theme_dark(), theme_class(), theme_void()`
+
+**Slide 14**
+```{r}
+mpg %>% ggplot(aes(displ, hwy)) +
+  geom_point() +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1, 7.2) + ylim(9,46) +
+  theme_minimal()
+```
+Display Cylinder by Color (Charlie):
+```{r}
+mpg %>% ggplot(aes(displ, hwy)) +
+  geom_point(aes(color = factor(cyl))) +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1, 7.2) + ylim(9, 46) +
+  labs(color = 'cylinder') +
+  theme_minimal()
+```
+
+**Slide 15**
+
+Display Cylinder by Color (Dr. Sihm):
+```{r}
+mpg %>% ggplot(aes(displ, hwy)) +
+  geom_point(aes(color = factor(cyl)), show.legend = FALSE) +
+  geom_mark_ellipse(aes(label = cyl, group = cyl)) +
+  xlim(1,7.2) + ylim(9, 46) +
+  theme_minimal()
+```
+
+### How to Remove Legend
+
+**Slide 16**
+
+- Remove legend title only
+
+`p + theme(legend.title = element_black())`
+
+- Hide legend for specific geometry only
+
+`p + geom_yOuR_cHoIcE(aes(color = vAr_nAmE), show.legend = FALSE)`
+
+- Hide entire legend
+
+`p + theme(legend.position = 'none')`
+
+**Slide 17**
+```{r, message = FALSE, warning = FALSE}
+library(gghighlight)
+data(Oxboys, package = 'nlme')
+
+Oxboys %>% ggplot(aes(age, height, group = Subject)) +
+  geom_line() +
+  geom_point() +
+  gghighlight(Subject %in% 1:3)
+```
+
+### Annotations Across Facets
+
+**Slide 18**
+```{r}
+diamonds %>% ggplot(aes(log10(carat), log10(price))) +
+  geom_bin2d() +
+  facet_wrap(~cut, nrow = 1)
+```
+
+**Slide 19**
+
+- First, have y-int and slope of trend line over entire dataset
+```{r}
+linear_model <- lm(log10(price) ~ log10(carat), data = diamonds)
+coef_values <- coef(linear_model)
+```
+
+- Add this line to all plots across facets. Now we have shared ref. line
+```{r}
+diamonds %>% ggplot(aes(log10(carat), log10(price))) +
+  geom_bin2d() +
+  geom_abline(intercept = coef_values[1], slope = coef_values[2], 
+              color = 'white', size = .7) +
+  facet_wrap(~cut, nrow = 1)
+```
+
+**Slide 20**
+```{r}
+mpg %>% ggplot(aes(displ, hwy, color = factor(cyl))) + 
+  geom_point() +
+  gghighlight() +
+  facet_wrap(~cyl, ncol = 1)
+```
+
+
+### Arranging Plots Side by Side
+
+**Slide 21**
+
+- Create the following 4 plots
+```{r}
+plot_1 <- mpg %>% ggplot() + geom_point(aes(x = displ, y = hwy))
+
+plot(plot_1)
+```
+
+**Slide 22**
+```{r}
+plot_2 <- mpg %>% ggplot() + geom_bar(aes(x = as.character(year),
+                                          fill = drv),
+                                      position = 'dodge') + xlab('year')
+
+plot(plot_2)
+```
+
+**Slide 23**
+```{r}
+plot_3 <- mpg %>% ggplot() +
+  geom_density(aes(x = hwy, fill = drv), color = NA) +
+  facet_wrap(~drv, ncol = 1) # Removing black lines
+
+plot(plot_3)
+```
+
+**Slide 24**
+```{r}
+plot_4 <- mpg %>% ggplot() + stat_summary(aes(drv, hwy, fill = drv),
+                                          geom = 'col', fun.data = mean_se) +
+  stat_summary(aes(drv, hwy), geom = 'errorbar', fun.data = mean_se, width=.5)
+
+plot(plot_4)
+```
+
+**Slide 25**
+```{r}
+library(patchwork)
+
+plot_1 + plot_2
+```
+
+**Slide 26**
+```{r}
+plot(plot_1 + plot_2)
+```
+
+**Slide 27**
+
+- Adding 3 plots will generated 1x3 grid (same default rules as `facet_wrap()`)
+```{r}
+plot_1 + plot_2 + plot_3
+```
+
+**Slide 28**
+
+- Adding 4 plots will generate 2x2
+- Notice patchwork handles alignments automatically
+
+```{r}
+plot_1 + plot_2 + plot_3 + plot_4
+```
+
+**Slide 29**
+```{r}
+plot_1 + plot_2 + plot_3 + plot_layout(ncol = 2)
+```
+
+**Slide 30**
+```{r}
+plot_1/plot_2
+```
+
+**Slide 31**
+```{r}
+plot_1 | plot_2
+```
+
+**Slide 32**
+```{r}
+plot_3 | (plot_2/ (plot_1 | plot_4))
+```
+
+**Slide 33**
+```{r}
+layout_1 <- '
+AAB
+C#B
+CDD
+'
+
+plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(design = layout_1)
+```
+
+**Slide 34**
+
+- We can put all legends into one place. Redudant ones will be dropped.
+```{r}
+plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(design = layout_1,
+                                                guides = 'collect')
+```
+
+**Slide 35**
+
+- Using `guide_area()`, we can put guides in an empty area
+```{r}
+plot_1 + plot_2 + plot_3 + guide_area() + plot_layout(ncol = 2, guides = 'collect')
+```
+
+**Slide 36**
+
+- Modifying subplots
+```{r}
+plot_1_2 <- plot_1 + plot_2
+plot_1_2[[1]] <- plot_1_2[[1]] + theme_dark()
+plot_1_2[[2]] <- plot_1_2[[2]] + theme_classic()
+plot_1_2
+```
+
+**Slide 37**
+
+- Assigning common theme in patchwork by &
+```{r}
+plot_1 + plot_4 & theme_minimal() # apply GGplot layers with & sign
+```
+
+**Slide 38**
+
+- Assign common y-axis in patchwork by &
+```{r}
+plot_1 + plot_4 & scale_y_continuous(limits = c(0,45))
+```
+
+**Slide 39**
+
+- Add annotation using `plot_annotation()`
+```{r}
+plot_3_4 <- plot_3 + plot_4 + plot_annotation(
+  title = 'A closer look at effect of drive train in cars',
+  caption = 'Source: mpg dataset in ggplot2'
+)
+
+plot_3_4
+```
+
+**Slide 40**
+```{r}
+plot_3_4 + plot_annotation(theme = theme_gray(base_family = 'mono'))
+```
+
+**Slide 41**
+```{r}
+plot_3_4 & theme_gray(base_family = 'mono')
+```
+
+**Slide 42**
+
+- Tagging each plot (common in sci. lit.)
+
+```{r}
+plot_1_2_3 <- plot_1 | (plot_2 / plot_3)
+plot_1_2_3 + plot_annotation(tag_levels = 'I') # uppercase Roman Numerals
+```
+
+**Slide 43**
+
+- Use nesting to define new tagging levels.
+```{r}
+plot_1_2_3[[2]] <- plot_1_2_3[[2]]+ plot_layout(tag_level = 'new')
+plot_1_2_3 + plot_annotation(tag_levels = c('I', 'a')) 
+# uppercase rom numeral, then lowercase alphabet
+```
+
+**Slide 44**
+
+- Use `inset_element()`
+```{r}
+plot_1 + inset_element(plot_2, left = .5, bottom = .4,
+                       right = .9, top = .95)
+
+# `npc`: Normalized Parent Coordinate
+# relative unit 0 to 1
+```
+
+**Slide 45**
+
+- Use different unit with `inset_element()`
+```{r}
+plot_1_2_a <- plot_1 + inset_element(plot_2, left = .5, bottom = .4,
+                                     right = unit(1, 'npc') - unit(5, 'mm'),
+                                     top = unit(1, 'npc') - unit(3, 'mm'),
+                                     align_to = 'full')
+plot(plot_1_2_a)
+```
+
+**Slide 46**
+
+- Change theme using & likewise
+```{r}
+plot_1_2_a & theme_minimal()
+```
+
+**Slide 47**
+
+- Tagging works as expected
+```{r}
+plot_1_2_a + plot_annotation(tag_levels = 'A') & theme_dark()
+```
