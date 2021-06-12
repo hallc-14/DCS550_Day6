@@ -1,0 +1,67 @@
+---
+title: Chapter 4 Exercise
+author: 'Charlie Hall'
+date: '2021-06-08'
+slug: []
+categories: ['Shiny','DCS 550']
+tags: ['Shiny']
+---
+
+
+
+<div id="exercise-1" class="section level3">
+<h3>Exercise 1</h3>
+<p><strong>Graph of 4.4</strong></p>
+<p><img src = "app1chart.png" alt = "drawing" style = "float:center;width:400px;"/></p>
+<p><strong>Graph of 4.5</strong></p>
+<p><img src = "app2chart.png" alt = "drawing" style = "float:center;width:400px;"/></p>
+<p><strong>Graph of 4.6</strong></p>
+<p><img src = "app3chart.png" alt = "drawing" style = "float:center;width:400px;"/></p>
+<p><strong>Graph of 4.7</strong></p>
+<p><img src = "app4chart.png" alt = "drawing" style = "float:center;width:400px;"/></p>
+</div>
+<div id="exercise-2" class="section level3">
+<h3>Exercise 2</h3>
+<p>If you flip these two functions, the table produces errors because the code contains unused arguments.</p>
+</div>
+<div id="exercise-3" class="section level3">
+<h3>Exercise 3</h3>
+<p>I determined that the maximum amount of unique values in a given column is 30, so I am using that as max number of outputs.</p>
+<p>I changed the following pieces of code in the app.</p>
+<p>Add a column in the UI for numeric input at the top:</p>
+<pre class="r"><code>column(2, numericInput(&quot;rows&quot;, &quot;Number of Rows&quot;, value = 5, min = 0, max = 30))</code></pre>
+<p>Make the default n-value in <code>count_top()</code> function 30:</p>
+<pre class="r"><code>count_top &lt;- function(df, var, n = 30) {
+    df %&gt;%
+        mutate({{ var }} := fct_lump(fct_infreq({{ var }}), n = n)) %&gt;%
+        group_by({{ var }}) %&gt;%
+        summarise(n = as.integer(sum(weight)))
+}</code></pre>
+<p>Use <code>head()</code> function in the server to reference the user input:</p>
+<pre class="r"><code>output$diag &lt;- renderTable(head(count_top(selected(), diag), n = input$rows), width = &quot;100%&quot; )
+    output$body_part &lt;- renderTable(head(count_top(selected(), body_part), n = input$rows), width = &quot;100%&quot;)
+    output$location &lt;- renderTable(head(count_top(selected(), location), n = input$rows), width = &quot;100%&quot;)</code></pre>
+</div>
+<div id="exercise-4" class="section level3">
+<h3>Exercise 4</h3>
+<p>To move through the narrative, I had to create back/forward buttons and replace the <code>sample()</code> function from the output with <code>observeEvent</code> functions to calculate the index number of each narrative position.</p>
+<p>Buttons added to the UI:</p>
+<pre class="r"><code>column(2, actionButton(&quot;back&quot;, &quot;Previous&quot;)),
+        column(2, actionButton(&quot;forward&quot;, &quot;Next&quot;))</code></pre>
+<p>Server code to display first narrative and move through the index according to which button clicked:</p>
+<pre class="r"><code>    n &lt;- reactiveVal(1)
+    
+    observeEvent(input$back, {
+        n(n() - 1)
+    })
+    observeEvent(input$forward, {
+        n(n() + 1)
+    })
+                 
+    output$narrative &lt;- renderText(selected()$narrative[n()])</code></pre>
+</div>
+<div id="final-app" class="section level3">
+<h3>Final App:</h3>
+<iframe src="https://hallc.shinyapps.io/masteringshiny_chap_4_exercises/" width="800" height="600" style="border:none;">
+</iframe>
+</div>
