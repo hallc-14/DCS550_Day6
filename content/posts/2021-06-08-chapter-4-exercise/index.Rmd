@@ -83,5 +83,5 @@ Server code to display first narrative and move through the index according to w
 
 ### Final App:
 
-<iframe src= "https://hallc.shinyapps.io/masteringshiny_chap_4_exercises/" width: 100%; 
-height: 100%; style = "border:none;"></iframe>
+<iframe src= "https://hallc.shinyapps.io/masteringshiny_chap_4_exercises/" width = "100%"; 
+height = "100%"; style = "border:none;"></iframe>
