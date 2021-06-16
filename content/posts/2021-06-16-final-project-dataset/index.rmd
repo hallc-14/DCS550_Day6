@@ -151,6 +151,14 @@ This variable will provide insight into the possible contributing factor of road
 bicycle %>% select(LightCondition) %>% head() %>% kable()
 ```
 
+#### Injuries
+
+```{r echo = FALSE}
+bicycle %>% select(BikerInjury, DriverInjury) %>% head() %>% kable()
+```
+
+Injury will largely be used as the outcome variable. The injury variable indicates the severity of the injury, with the following options: `r unique(bicycle$BikerInjury)`
+
 This variable indicates the lighting condition at the time of the crash.
 
 #### City, Crash Date, Geographic Information
