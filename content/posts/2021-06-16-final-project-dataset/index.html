@@ -50,6 +50,8 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 </div>
 <div id="exploring-the-dataset" class="section level3">
 <h3>Exploring the Dataset</h3>
+<div id="with-head-function" class="section level4">
+<h4>With <code>head()</code> Function</h4>
 <pre class="r"><code>head(bicycle)</code></pre>
 <pre><code>## # A tibble: 6 x 15
 ##   City  CrashDate  BikerAgeGroup DriverAgeGroup BikerAlcohol DriverAlcohol
@@ -63,6 +65,9 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 ## # ... with 9 more variables: BikerInjury &lt;fct&gt;, DriverInjury &lt;fct&gt;,
 ## #   DriverVehicleType &lt;fct&gt;, DriverEstimatedSpeed &lt;fct&gt;, SpeedLimit &lt;fct&gt;,
 ## #   RoadCondition &lt;fct&gt;, LightCondition &lt;fct&gt;, Lat &lt;dbl&gt;, Lon &lt;dbl&gt;</code></pre>
+</div>
+<div id="with-summary-function" class="section level4">
+<h4>With <code>summary()</code> Function</h4>
 <pre class="r"><code>summary(bicycle)</code></pre>
 <pre><code>##      City             CrashDate          BikerAgeGroup  DriverAgeGroup
 ##  Length:7467        Min.   :2007-01-02   40-49  :1144   30-39  :1164  
@@ -104,9 +109,12 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 ##  Dawn                      :  88   3rd Qu.:35.92   3rd Qu.:-78.04  
 ##  Dark - Unknown Lighting   :  31   Max.   :36.56   Max.   :-75.46  
 ##  (Other)                   :  16</code></pre>
+</div>
+<div id="with-skim-function" class="section level4">
+<h4>With <code>skim()</code> Function</h4>
 <pre class="r"><code>skim(bicycle)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-3">Table 1: </span>Data summary</caption>
+<caption><span id="tab:unnamed-chunk-5">Table 1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
@@ -355,6 +363,9 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
+<div id="with-glimpse-function" class="section level4">
+<h4>With <code>glimpse()</code> Function</h4>
 <pre class="r"><code>glimpse(bicycle)</code></pre>
 <pre><code>## Rows: 7,467
 ## Columns: 15
@@ -374,6 +385,7 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 ## $ Lat                  &lt;dbl&gt; 34.81481, 35.08628, 35.05699, 35.58698, 35.28146,~
 ## $ Lon                  &lt;dbl&gt; -79.08423, -78.90419, -80.76989, -82.56651, -81.5~</code></pre>
 <hr />
+</div>
 </div>
 <div id="variables" class="section level3">
 <h3>Variables</h3>

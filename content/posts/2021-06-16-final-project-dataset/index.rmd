@@ -18,7 +18,11 @@ library(knitr)
 ```{r message = FALSE, warning = FALSE}
 bicycle <- read_delim('nc_bicycle_crash.csv', delim = ';',
            na = c('#NULL!', ''))
+```
 
+#### Selecting and Renaming Columns for Clarity
+
+```{r message = FALSE, warning = FALSE}
 bicycle <- bicycle %>%
   transmute(
     
@@ -44,7 +48,11 @@ bicycle <- bicycle %>%
     GeoPts = geo_point_2d
     
   )
+```
 
+#### Separating Longitude and Latitude for Mapping
+
+```{r message = FALSE, warning = FALSE}
 bicycle <- bicycle %>% 
   separate(GeoPts, sep = ';',
            into = c('Lat', 'Lon'), remove = TRUE)
@@ -57,15 +65,25 @@ bicycle$Lat <- as.numeric(bicycle$Lat)
 
 ### Exploring the Dataset
 
+#### With `head()` Function
+
 ``` {r message = FALSE, warning = FALSE}
 head(bicycle)
+```
 
+#### With `summary()` Function
+```{r message = FALSE, warning = FALSE}
 summary(bicycle)
+```
 
+#### With `skim()` Function
+```{r message = FALSE, warning = FALSE}
 skim(bicycle)
+```
 
+#### With `glimpse()` Function
+```{r message = FALSE, warning = FALSE}
 glimpse(bicycle)
-
 ```
 
 -----
