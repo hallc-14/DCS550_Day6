@@ -1,9 +1,145 @@
 ---
-title: Final Project Dataset
-author: ''
+title: Dataset for Final Project
+author: 'Charlie H.'
 date: '2021-06-16'
 slug: []
-categories: []
+categories: ['final project', 'dcs 550']
 tags: []
 ---
 
+```{r include = FALSE}
+library(tidyverse)
+library(skimr)
+library(knitr)
+```
+
+### Loading and Tidying the Dataset
+
+```{r message = FALSE, warning = FALSE}
+bicycle <- read_delim('nc_bicycle_crash.csv', delim = ';',
+           na = c('#NULL!', ''))
+
+bicycle <- bicycle %>%
+  transmute(
+    
+    City = city,
+    CrashDate = as.Date(crashdate, '%d%b%Y'),
+    
+    BikerAgeGroup = as.factor(bikeagegrp),
+    DriverAgeGroup = as.factor(drvragegrp),
+
+    BikerAlcohol = as.factor(bikealcoho),
+    DriverAlcohol = as.factor(drvralcoho),
+
+    BikerInjury = as.factor(bikeinjury),
+    DriverInjury = as.factor(drvrinjury),
+    
+    DriverVehicleType = as.factor(drvrvehtyp),
+    DriverEstimatedSpeed = as.factor(drvrestspd),
+    SpeedLimit = as.factor(speedlimit),
+
+    RoadCondition = as.factor(rdconditio),
+    LightCondition = as.factor(lightcond),
+    
+    GeoPts = geo_point_2d
+    
+  )
+
+bicycle <- bicycle %>% 
+  separate(GeoPts, sep = ';',
+           into = c('Lat', 'Lon'), remove = TRUE)
+
+bicycle$Lon <- as.numeric(bicycle$Lon)
+bicycle$Lat <- as.numeric(bicycle$Lat)
+```
+
+-----
+
+### Exploring the Dataset
+
+``` {r message = FALSE, warning = FALSE}
+head(bicycle)
+
+summary(bicycle)
+
+skim(bicycle)
+
+glimpse(bicycle)
+
+```
+
+-----
+
+### Variables
+
+There were originally 66 columns in the dataset, so I selected those most relevant to my study. I am interested primarily in surveying the effect of the following variables on both driver and bicyclist injury:
+
+1. Age
+2. Alcohol
+3. Vehicle Type
+4. Speed vs. Speed Limit
+5. Road Conditions
+6. Lighting Conditions
+
+The additional variables of City and Date are included for organizational purposes. Each variable is defined as follows:
+
+#### Age Group
+
+```{r echo = FALSE}
+bicycle %>% select(BikerAgeGroup, DriverAgeGroup) %>%
+  head() %>%  kable()
+```
+
+These two variables indicate the age range of the bicyclist and driver.
+
+#### Alcohol Use
+
+```{r echo = FALSE}
+bicycle %>% select(BikerAlcohol, DriverAlcohol) %>%
+  head() %>% kable()
+```
+
+These two variables indicate whether the bicyclist or driver were under the influence of alcohol at the time of the crash.
+
+#### Vehicle Type
+
+```{r echo = FALSE}
+bicycle %>% select(DriverVehicleType) %>% head() %>% kable()
+```
+
+This variable indicates the vehicle type of the driver.
+
+#### Speed and Speed Limit
+
+```{r echo = FALSE}
+bicycle %>% select(DriverEstimatedSpeed, SpeedLimit) %>%
+  head() %>% kable()
+```
+
+These two variables are included for comparative analysis. I would like to examine whether breaking the speed limit has any noticeable correlation with crashes.
+
+#### Road Conditions
+
+```{r echo = FALSE}
+bicycle %>% select(RoadCondition) %>% head() %>%
+  kable()
+```
+
+This variable will provide insight into the possible contributing factor of road conditions at the time of the crash.
+
+#### Lighting Conditions
+
+```{r echo = FALSE}
+bicycle %>% select(LightCondition) %>% head() %>% kable()
+```
+
+This variable indicates the lighting condition at the time of the crash.
+
+#### City, Crash Date, Geographic Information
+
+```{r echo = FALSE}
+bicycle %>% select(City, CrashDate, Lat, Lon) %>% head() %>%
+  kable()
+```
+
+The City and Crash Date variables are for organization. I have included the geographic data for plotting purposes. 

@@ -1,0 +1,649 @@
+---
+title: Dataset for Final Project
+author: 'Charlie H.'
+date: '2021-06-16'
+slug: []
+categories: ['final project', 'dcs 550']
+tags: []
+---
+
+
+
+<div id="loading-and-tidying-the-dataset" class="section level3">
+<h3>Loading and Tidying the Dataset</h3>
+<pre class="r"><code>bicycle &lt;- read_delim(&#39;nc_bicycle_crash.csv&#39;, delim = &#39;;&#39;,
+           na = c(&#39;#NULL!&#39;, &#39;&#39;))
+
+bicycle &lt;- bicycle %&gt;%
+  transmute(
+    
+    City = city,
+    CrashDate = as.Date(crashdate, &#39;%d%b%Y&#39;),
+    
+    BikerAgeGroup = as.factor(bikeagegrp),
+    DriverAgeGroup = as.factor(drvragegrp),
+
+    BikerAlcohol = as.factor(bikealcoho),
+    DriverAlcohol = as.factor(drvralcoho),
+
+    BikerInjury = as.factor(bikeinjury),
+    DriverInjury = as.factor(drvrinjury),
+    
+    DriverVehicleType = as.factor(drvrvehtyp),
+    DriverEstimatedSpeed = as.factor(drvrestspd),
+    SpeedLimit = as.factor(speedlimit),
+
+    RoadCondition = as.factor(rdconditio),
+    LightCondition = as.factor(lightcond),
+    
+    GeoPts = geo_point_2d
+    
+  )
+
+bicycle &lt;- bicycle %&gt;% 
+  separate(GeoPts, sep = &#39;;&#39;,
+           into = c(&#39;Lat&#39;, &#39;Lon&#39;), remove = TRUE)
+
+bicycle$Lon &lt;- as.numeric(bicycle$Lon)
+bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
+<hr />
+</div>
+<div id="exploring-the-dataset" class="section level3">
+<h3>Exploring the Dataset</h3>
+<pre class="r"><code>head(bicycle)</code></pre>
+<pre><code>## # A tibble: 6 x 15
+##   City  CrashDate  BikerAgeGroup DriverAgeGroup BikerAlcohol DriverAlcohol
+##   &lt;chr&gt; &lt;date&gt;     &lt;fct&gt;         &lt;fct&gt;          &lt;fct&gt;        &lt;fct&gt;        
+## 1 None~ 2008-07-30 20-24         50-59          Yes          No           
+## 2 Faye~ 2008-08-05 30-39         40-49          No           No           
+## 3 Char~ 2008-09-01 60-69         20-24          No           No           
+## 4 Ashe~ 2008-08-08 20-24         Unknown        No           No           
+## 5 Shel~ 2008-08-12 11-15         60-69          No           No           
+## 6 Rale~ 2008-07-10 20-24         Unknown        No           Missing      
+## # ... with 9 more variables: BikerInjury &lt;fct&gt;, DriverInjury &lt;fct&gt;,
+## #   DriverVehicleType &lt;fct&gt;, DriverEstimatedSpeed &lt;fct&gt;, SpeedLimit &lt;fct&gt;,
+## #   RoadCondition &lt;fct&gt;, LightCondition &lt;fct&gt;, Lat &lt;dbl&gt;, Lon &lt;dbl&gt;</code></pre>
+<pre class="r"><code>summary(bicycle)</code></pre>
+<pre><code>##      City             CrashDate          BikerAgeGroup  DriverAgeGroup
+##  Length:7467        Min.   :2007-01-02   40-49  :1144   30-39  :1164  
+##  Class :character   1st Qu.:2008-10-20   50-59  :1013   40-49  :1155  
+##  Mode  :character   Median :2010-11-16   11-15  : 933   Unknown: 993  
+##                     Mean   :2010-12-14   20-24  : 910   50-59  : 944  
+##                     3rd Qu.:2012-11-06   30-39  : 881   20-24  : 839  
+##                     Max.   :2014-12-31   16-19  : 794   25-29  : 693  
+##                                          (Other):1792   (Other):1679  
+##   BikerAlcohol  DriverAlcohol               BikerInjury  
+##  Missing:  74   Missing: 725   A: Disabling Injury: 364  
+##  No     :6112   No     :5778   B: Evident Injury  :3105  
+##  Yes    : 431   Yes    : 114   C: Possible Injury :2916  
+##  NA&#39;s   : 850   NA&#39;s   : 850   K: Killed          : 162  
+##                                O: No Injury       : 710  
+##                                Unknown Injury     : 210  
+##                                                          
+##               DriverInjury                      DriverVehicleType
+##  A: Disabling Injury:   9   Passenger Car                :3941   
+##  B: Evident Injury  :  61   Sport Utility                :1150   
+##  C: Possible Injury : 106   Pickup                       : 962   
+##  K: Killed          :   2   Unknown                      : 638   
+##  O: No Injury       :6244   Van                          : 372   
+##  Unknown Injury     :1045   Light Truck (Mini-Van, Panel): 111   
+##                             (Other)                      : 293   
+##  DriverEstimatedSpeed        SpeedLimit                    RoadCondition 
+##  0-5 mph  :1756       20 - 25  MPH:1191   Dry                     :6853  
+##  31-35 mph: 846       30 - 35  MPH:2983   Wet                     : 552  
+##  6-10 mph : 840       40 - 45  MPH:1625   Water (Standing, Moving):  29  
+##  41-45 mph: 670       5 - 15 MPH  : 401   Unknown                 :  22  
+##  Unknown  : 580       50 - 55  MPH: 881   Sand, Mud, Dirt, Gravel :   5  
+##  11-15 mph: 552       60 - 75 MPH :  22   Snow                    :   3  
+##  (Other)  :2223       Unknown     : 364   (Other)                 :   3  
+##                     LightCondition      Lat             Lon        
+##  Daylight                  :5489   Min.   :33.87   Min.   :-84.01  
+##  Dark - Lighted Roadway    : 879   1st Qu.:35.18   1st Qu.:-80.61  
+##  Dark - Roadway Not Lighted: 706   Median :35.60   Median :-78.94  
+##  Dusk                      : 258   Mean   :35.47   Mean   :-79.25  
+##  Dawn                      :  88   3rd Qu.:35.92   3rd Qu.:-78.04  
+##  Dark - Unknown Lighting   :  31   Max.   :36.56   Max.   :-75.46  
+##  (Other)                   :  16</code></pre>
+<pre class="r"><code>skim(bicycle)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-3">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">bicycle</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">7467</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">15</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">Date</td>
+<td align="left">1</td>
+</tr>
+<tr class="even">
+<td align="left">factor</td>
+<td align="left">11</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">City</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">286</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: Date</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="left">min</th>
+<th align="left">max</th>
+<th align="left">median</th>
+<th align="right">n_unique</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CrashDate</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="left">2007-01-02</td>
+<td align="left">2014-12-31</td>
+<td align="left">2010-11-16</td>
+<td align="right">2555</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="left">ordered</th>
+<th align="right">n_unique</th>
+<th align="left">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">BikerAgeGroup</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">12</td>
+<td align="left">40-: 1144, 50-: 1013, 11-: 933, 20-: 910</td>
+</tr>
+<tr class="even">
+<td align="left">DriverAgeGroup</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">9</td>
+<td align="left">30-: 1164, 40-: 1155, Unk: 993, 50-: 944</td>
+</tr>
+<tr class="odd">
+<td align="left">BikerAlcohol</td>
+<td align="right">850</td>
+<td align="right">0.89</td>
+<td align="left">FALSE</td>
+<td align="right">3</td>
+<td align="left">No: 6112, Yes: 431, Mis: 74</td>
+</tr>
+<tr class="even">
+<td align="left">DriverAlcohol</td>
+<td align="right">850</td>
+<td align="right">0.89</td>
+<td align="left">FALSE</td>
+<td align="right">3</td>
+<td align="left">No: 5778, Mis: 725, Yes: 114</td>
+</tr>
+<tr class="odd">
+<td align="left">BikerInjury</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">6</td>
+<td align="left">B: : 3105, C: : 2916, O: : 710, A: : 364</td>
+</tr>
+<tr class="even">
+<td align="left">DriverInjury</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">6</td>
+<td align="left">O: : 6244, Unk: 1045, C: : 106, B: : 61</td>
+</tr>
+<tr class="odd">
+<td align="left">DriverVehicleType</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">23</td>
+<td align="left">Pas: 3941, Spo: 1150, Pic: 962, Unk: 638</td>
+</tr>
+<tr class="even">
+<td align="left">DriverEstimatedSpeed</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">17</td>
+<td align="left">0-5: 1756, 31-: 846, 6-1: 840, 41-: 670</td>
+</tr>
+<tr class="odd">
+<td align="left">SpeedLimit</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">7</td>
+<td align="left">30 : 2983, 40 : 1625, 20 : 1191, 50 : 881</td>
+</tr>
+<tr class="even">
+<td align="left">RoadCondition</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">8</td>
+<td align="left">Dry: 6853, Wet: 552, Wat: 29, Unk: 22</td>
+</tr>
+<tr class="odd">
+<td align="left">LightCondition</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">FALSE</td>
+<td align="right">8</td>
+<td align="left">Day: 5489, Dar: 879, Dar: 706, Dus: 258</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Lat</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">35.47</td>
+<td align="right">0.57</td>
+<td align="right">33.87</td>
+<td align="right">35.18</td>
+<td align="right">35.60</td>
+<td align="right">35.92</td>
+<td align="right">36.56</td>
+<td align="left">▂▂▆▇▃</td>
+</tr>
+<tr class="even">
+<td align="left">Lon</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">-79.25</td>
+<td align="right">1.53</td>
+<td align="right">-84.01</td>
+<td align="right">-80.61</td>
+<td align="right">-78.94</td>
+<td align="right">-78.04</td>
+<td align="right">-75.46</td>
+<td align="left">▁▅▆▇▂</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>glimpse(bicycle)</code></pre>
+<pre><code>## Rows: 7,467
+## Columns: 15
+## $ City                 &lt;chr&gt; &quot;None - Rural Crash&quot;, &quot;Fayetteville&quot;, &quot;Charlotte&quot;~
+## $ CrashDate            &lt;date&gt; 2008-07-30, 2008-08-05, 2008-09-01, 2008-08-08, ~
+## $ BikerAgeGroup        &lt;fct&gt; 20-24, 30-39, 60-69, 20-24, 11-15, 20-24, 30-39, ~
+## $ DriverAgeGroup       &lt;fct&gt; 50-59, 40-49, 20-24, Unknown, 60-69, Unknown, 25-~
+## $ BikerAlcohol         &lt;fct&gt; Yes, No, No, No, No, No, No, No, No, No, No, No, ~
+## $ DriverAlcohol        &lt;fct&gt; No, No, No, No, No, Missing, No, Missing, No, No,~
+## $ BikerInjury          &lt;fct&gt; B: Evident Injury, O: No Injury, B: Evident Injur~
+## $ DriverInjury         &lt;fct&gt; O: No Injury, O: No Injury, O: No Injury, Unknown~
+## $ DriverVehicleType    &lt;fct&gt; &quot;Passenger Car&quot;, &quot;Police&quot;, &quot;Passenger Car&quot;, &quot;Pick~
+## $ DriverEstimatedSpeed &lt;fct&gt; 46-50 mph, 6-10 mph, 41-45 mph, Unknown, 16-20 mp~
+## $ SpeedLimit           &lt;fct&gt; 50 - 55  MPH, 5 - 15 MPH, 40 - 45  MPH, 30 - 35  ~
+## $ RoadCondition        &lt;fct&gt; &quot;Wet&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, &quot;Dry&quot;, ~
+## $ LightCondition       &lt;fct&gt; Daylight, Daylight, Daylight, Daylight, Daylight,~
+## $ Lat                  &lt;dbl&gt; 34.81481, 35.08628, 35.05699, 35.58698, 35.28146,~
+## $ Lon                  &lt;dbl&gt; -79.08423, -78.90419, -80.76989, -82.56651, -81.5~</code></pre>
+<hr />
+</div>
+<div id="variables" class="section level3">
+<h3>Variables</h3>
+<p>There were originally 66 columns in the dataset, so I selected those most relevant to my study. I am interested primarily in surveying the effect of the following variables on both driver and bicyclist injury:</p>
+<ol style="list-style-type: decimal">
+<li>Age</li>
+<li>Alcohol</li>
+<li>Vehicle Type</li>
+<li>Speed vs. Speed Limit</li>
+<li>Road Conditions</li>
+<li>Lighting Conditions</li>
+</ol>
+<p>The additional variables of City and Date are included for organizational purposes. Each variable is defined as follows:</p>
+<div id="age-group" class="section level4">
+<h4>Age Group</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">BikerAgeGroup</th>
+<th align="left">DriverAgeGroup</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">20-24</td>
+<td align="left">50-59</td>
+</tr>
+<tr class="even">
+<td align="left">30-39</td>
+<td align="left">40-49</td>
+</tr>
+<tr class="odd">
+<td align="left">60-69</td>
+<td align="left">20-24</td>
+</tr>
+<tr class="even">
+<td align="left">20-24</td>
+<td align="left">Unknown</td>
+</tr>
+<tr class="odd">
+<td align="left">11-15</td>
+<td align="left">60-69</td>
+</tr>
+<tr class="even">
+<td align="left">20-24</td>
+<td align="left">Unknown</td>
+</tr>
+</tbody>
+</table>
+<p>These two variables indicate the age range of the bicyclist and driver.</p>
+</div>
+<div id="alcohol-use" class="section level4">
+<h4>Alcohol Use</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">BikerAlcohol</th>
+<th align="left">DriverAlcohol</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Yes</td>
+<td align="left">No</td>
+</tr>
+<tr class="even">
+<td align="left">No</td>
+<td align="left">No</td>
+</tr>
+<tr class="odd">
+<td align="left">No</td>
+<td align="left">No</td>
+</tr>
+<tr class="even">
+<td align="left">No</td>
+<td align="left">No</td>
+</tr>
+<tr class="odd">
+<td align="left">No</td>
+<td align="left">No</td>
+</tr>
+<tr class="even">
+<td align="left">No</td>
+<td align="left">Missing</td>
+</tr>
+</tbody>
+</table>
+<p>These two variables indicate whether the bicyclist or driver were under the influence of alcohol at the time of the crash.</p>
+</div>
+<div id="vehicle-type" class="section level4">
+<h4>Vehicle Type</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">DriverVehicleType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Passenger Car</td>
+</tr>
+<tr class="even">
+<td align="left">Police</td>
+</tr>
+<tr class="odd">
+<td align="left">Passenger Car</td>
+</tr>
+<tr class="even">
+<td align="left">Pickup</td>
+</tr>
+<tr class="odd">
+<td align="left">Passenger Car</td>
+</tr>
+<tr class="even">
+<td align="left">Sport Utility</td>
+</tr>
+</tbody>
+</table>
+<p>This variable indicates the vehicle type of the driver.</p>
+</div>
+<div id="speed-and-speed-limit" class="section level4">
+<h4>Speed and Speed Limit</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">DriverEstimatedSpeed</th>
+<th align="left">SpeedLimit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">46-50 mph</td>
+<td align="left">50 - 55 MPH</td>
+</tr>
+<tr class="even">
+<td align="left">6-10 mph</td>
+<td align="left">5 - 15 MPH</td>
+</tr>
+<tr class="odd">
+<td align="left">41-45 mph</td>
+<td align="left">40 - 45 MPH</td>
+</tr>
+<tr class="even">
+<td align="left">Unknown</td>
+<td align="left">30 - 35 MPH</td>
+</tr>
+<tr class="odd">
+<td align="left">16-20 mph</td>
+<td align="left">30 - 35 MPH</td>
+</tr>
+<tr class="even">
+<td align="left">0-5 mph</td>
+<td align="left">5 - 15 MPH</td>
+</tr>
+</tbody>
+</table>
+<p>These two variables are included for comparative analysis. I would like to examine whether breaking the speed limit has any noticeable correlation with crashes.</p>
+</div>
+<div id="road-conditions" class="section level4">
+<h4>Road Conditions</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">RoadCondition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Wet</td>
+</tr>
+<tr class="even">
+<td align="left">Dry</td>
+</tr>
+<tr class="odd">
+<td align="left">Dry</td>
+</tr>
+<tr class="even">
+<td align="left">Dry</td>
+</tr>
+<tr class="odd">
+<td align="left">Dry</td>
+</tr>
+<tr class="even">
+<td align="left">Dry</td>
+</tr>
+</tbody>
+</table>
+<p>This variable will provide insight into the possible contributing factor of road conditions at the time of the crash.</p>
+</div>
+<div id="lighting-conditions" class="section level4">
+<h4>Lighting Conditions</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">LightCondition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Daylight</td>
+</tr>
+<tr class="even">
+<td align="left">Daylight</td>
+</tr>
+<tr class="odd">
+<td align="left">Daylight</td>
+</tr>
+<tr class="even">
+<td align="left">Daylight</td>
+</tr>
+<tr class="odd">
+<td align="left">Daylight</td>
+</tr>
+<tr class="even">
+<td align="left">Dark - Lighted Roadway</td>
+</tr>
+</tbody>
+</table>
+<p>This variable indicates the lighting condition at the time of the crash.</p>
+</div>
+<div id="city-crash-date-geographic-information" class="section level4">
+<h4>City, Crash Date, Geographic Information</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">City</th>
+<th align="left">CrashDate</th>
+<th align="right">Lat</th>
+<th align="right">Lon</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">None - Rural Crash</td>
+<td align="left">2008-07-30</td>
+<td align="right">34.81481</td>
+<td align="right">-79.08423</td>
+</tr>
+<tr class="even">
+<td align="left">Fayetteville</td>
+<td align="left">2008-08-05</td>
+<td align="right">35.08628</td>
+<td align="right">-78.90419</td>
+</tr>
+<tr class="odd">
+<td align="left">Charlotte</td>
+<td align="left">2008-09-01</td>
+<td align="right">35.05699</td>
+<td align="right">-80.76989</td>
+</tr>
+<tr class="even">
+<td align="left">Asheville</td>
+<td align="left">2008-08-08</td>
+<td align="right">35.58698</td>
+<td align="right">-82.56651</td>
+</tr>
+<tr class="odd">
+<td align="left">Shelby</td>
+<td align="left">2008-08-12</td>
+<td align="right">35.28146</td>
+<td align="right">-81.54608</td>
+</tr>
+<tr class="even">
+<td align="left">Raleigh</td>
+<td align="left">2008-07-10</td>
+<td align="right">35.77837</td>
+<td align="right">-78.64325</td>
+</tr>
+</tbody>
+</table>
+<p>The City and Crash Date variables are for organization. I have included the geographic data for plotting purposes.</p>
+</div>
+</div>
