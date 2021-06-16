@@ -12,9 +12,10 @@ tags: []
 <div id="loading-and-tidying-the-dataset" class="section level3">
 <h3>Loading and Tidying the Dataset</h3>
 <pre class="r"><code>bicycle &lt;- read_delim(&#39;nc_bicycle_crash.csv&#39;, delim = &#39;;&#39;,
-           na = c(&#39;#NULL!&#39;, &#39;&#39;))
-
-bicycle &lt;- bicycle %&gt;%
+           na = c(&#39;#NULL!&#39;, &#39;&#39;))</code></pre>
+<div id="selecting-and-renaming-columns-for-clarity" class="section level4">
+<h4>Selecting and Renaming Columns for Clarity</h4>
+<pre class="r"><code>bicycle &lt;- bicycle %&gt;%
   transmute(
     
     City = city,
@@ -38,15 +39,18 @@ bicycle &lt;- bicycle %&gt;%
     
     GeoPts = geo_point_2d
     
-  )
-
-bicycle &lt;- bicycle %&gt;% 
+  )</code></pre>
+</div>
+<div id="separating-longitude-and-latitude-for-mapping" class="section level4">
+<h4>Separating Longitude and Latitude for Mapping</h4>
+<pre class="r"><code>bicycle &lt;- bicycle %&gt;% 
   separate(GeoPts, sep = &#39;;&#39;,
            into = c(&#39;Lat&#39;, &#39;Lon&#39;), remove = TRUE)
 
 bicycle$Lon &lt;- as.numeric(bicycle$Lon)
 bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 <hr />
+</div>
 </div>
 <div id="exploring-the-dataset" class="section level3">
 <h3>Exploring the Dataset</h3>
@@ -114,7 +118,7 @@ bicycle$Lat &lt;- as.numeric(bicycle$Lat)</code></pre>
 <h4>With <code>skim()</code> Function</h4>
 <pre class="r"><code>skim(bicycle)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-5">Table 1: </span>Data summary</caption>
+<caption><span id="tab:unnamed-chunk-7">Table 1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
