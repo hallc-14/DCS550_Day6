@@ -1,0 +1,270 @@
+---
+title: 'Final Project: GGplot2 Plots, Shiny Apps, and Conclusion'
+author: ''
+date: '2021-06-22'
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<div id="ggplot-2-plots" class="section level2">
+<h2>GGplot 2 Plots</h2>
+<div id="setup" class="section level3">
+<h3>Setup</h3>
+<pre class="r"><code>library(tidyverse)
+library(sf)
+library(googleway)
+library(ggrepel)
+library(ggspatial)
+library(lwgeom)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
+library(tools)
+library(patchwork)
+
+bicycle &lt;- read_delim(&#39;nc_bicycle_crash.csv&#39;, delim = &#39;;&#39;,
+                      na = c(&#39;#NULL!&#39;, &#39;&#39;, &#39;Unknown&#39;, &#39;NA&#39;))
+
+bicycle &lt;- bicycle %&gt;%
+  transmute(
+    
+    City = city,
+    CrashDate = as.Date(crashdate, &#39;%d%b%Y&#39;),
+    
+    BikerAgeGroup = as.factor(bikeagegrp),
+    DriverAgeGroup = as.factor(drvragegrp),
+    
+    BikerAlcohol = as.factor(bikealcoho),
+    DriverAlcohol = as.factor(drvralcoho),
+    
+    BikerInjury = as.factor(bikeinjury),
+    DriverInjury = as.factor(drvrinjury),
+    
+    DriverVehicleType = as.factor(drvrvehtyp),
+    DriverEstimatedSpeed = as.factor(drvrestspd),
+    SpeedLimit = as.factor(speedlimit),
+    
+    RoadCondition = as.factor(rdconditio),
+    LightCondition = as.factor(lightcond),
+    
+    GeoPts = geo_point_2d
+    
+  )
+
+bicycle &lt;- bicycle %&gt;% 
+  separate(GeoPts, sep = &#39;;&#39;,
+           into = c(&#39;Lat&#39;, &#39;Lon&#39;), remove = TRUE)
+
+bicycle$Lon &lt;- as.numeric(bicycle$Lon)
+bicycle$Lat &lt;- as.numeric(bicycle$Lat)
+
+bicycle &lt;- na.omit(bicycle)
+
+bicycle$MaxSpeed &lt;- 0
+
+for (i in 1:length(bicycle$DriverEstimatedSpeed)){
+  if (bicycle$DriverEstimatedSpeed[i] == &#39;0-5 mph&#39; |
+      bicycle$DriverEstimatedSpeed[i] == &#39;6-10 mph&#39; |
+      bicycle$DriverEstimatedSpeed[i] == &#39;11-15 mph&#39; |
+      bicycle$DriverEstimatedSpeed[i] == &#39;16-20 mph&#39; |
+      bicycle$DriverEstimatedSpeed[i] == &#39;21-25 mph&#39;){
+    bicycle$MaxSpeed[i] &lt;- 25 
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == &#39;26-30 mph&#39; |
+           bicycle$DriverEstimatedSpeed[i] == &#39;31-35 mph&#39; ){
+    bicycle$MaxSpeed[i] &lt;- 35
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == &#39;36-40 mph&#39; |
+           bicycle$DriverEstimatedSpeed[i] == &#39;41-45 mph&#39; ){
+    bicycle$MaxSpeed[i] &lt;- 45
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == &#39;46-50 mph&#39; |
+           bicycle$DriverEstimatedSpeed[i] == &#39;51-55 mph&#39; ){
+    bicycle$MaxSpeed[i] &lt;- 55
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == &#39;56-60 mph&#39; |
+           bicycle$DriverEstimatedSpeed[i] == &#39;61-65 mph&#39; ){
+    bicycle$MaxSpeed[i] &lt;- 65
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == &#39;66-70 mph&#39; |
+           bicycle$DriverEstimatedSpeed[i] == &#39;71-75 mph&#39; ){
+    bicycle$MaxSpeed[i] &lt;- 75
+  }
+  else {
+    bicycle$MaxSpeed[i] &lt;- &#39;&gt; 75&#39;
+  }
+}
+
+bicycle$MaxSpeedLimit &lt;- 0
+
+for (i in 1:length(bicycle$SpeedLimit)){
+  if (bicycle$SpeedLimit[i] == &#39;20 - 25 MPH&#39;){
+    bicycle$MaxSpeedLimit[i] &lt;- 25 
+  }
+  else if (bicycle$SpeedLimit[i] == &#39;30 - 35  MPH&#39; ){
+    bicycle$MaxSpeedLimit[i] &lt;- 35
+  }
+  else if (bicycle$SpeedLimit[i] == &#39;40 - 45  MPH&#39; ){
+    bicycle$MaxSpeedLimit[i] &lt;- 45
+  }
+  else if (bicycle$SpeedLimit[i] == &#39;50 - 55  MPH&#39; ){
+    bicycle$MaxSpeedLimit[i] &lt;- 55
+  }
+  else if (bicycle$SpeedLimit[i] == &#39;60 - 65  MPH&#39; ){
+    bicycle$MaxSpeedLimit[i] &lt;- 65
+  }
+  else if (bicycle$SpeedLimit[i] == &#39;70 - 75  MPH&#39; ){
+    bicycle$MaxSpeedLimit[i] &lt;- 75
+  }
+}
+
+bicycle &lt;-
+  bicycle %&gt;% 
+  mutate(ObeyingSpLimit = (bicycle$MaxSpeed == bicycle$MaxSpeedLimit)) </code></pre>
+</div>
+<div id="plots-1-2" class="section level3">
+<h3>Plots 1 &amp; 2</h3>
+<pre class="r"><code>bikeAgePlot &lt;- ggplot(na.omit(bicycle), aes(BikerAgeGroup)) + 
+  geom_bar(aes(fill = BikerInjury), color = &#39;black&#39;) +
+  labs(title = &#39;Bicycle-Car Crashes by Bicyclist Age&#39;,
+       subtitle = &#39;Color-Coded by Bicyclist Injury&#39;,
+       y = &#39;Count&#39;, x = &#39;Age Group&#39;, fill = &#39;Injury Severity&#39;) +
+  theme_dark()
+
+drveAgePlot &lt;- ggplot(na.omit(bicycle), aes(DriverAgeGroup)) + 
+  geom_bar(aes(fill = DriverInjury), color = &#39;black&#39;) +
+  labs(title = &#39;Bicycle-Car Crashes by Driver Age&#39;,
+       subtitle = &#39;Color-Coded by Driver Injury&#39;,
+       fill = &#39;Injury Severity&#39;,
+       y = &#39;Count&#39;, x = &#39;Age Group&#39;) +
+  theme_dark()
+
+bikeAgePlot / drveAgePlot + plot_layout(guides = &#39;collect&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="plot-3" class="section level3">
+<h3>Plot 3</h3>
+<pre class="r"><code>ggplot(bicycle, aes(ObeyingSpLimit)) + 
+  geom_bar(fill = &#39;darkseagreen&#39;) +
+  facet_wrap(~ BikerInjury, ncol = 3) +
+  scale_y_continuous(breaks = c(100, 1:6 * 250)) +
+  theme_dark() +
+  labs(title = &#39;Bicyclist Injuries for Over vs. Within the Speed Limit&#39;,
+       x = &#39;Driver Obeyed Speed Limit&#39;, y = &#39;Count&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="plot-4" class="section level3">
+<h3>Plot 4</h3>
+<pre class="r"><code>bicycle %&gt;% filter(DriverInjury != &#39;O: No Injury&#39;) %&gt;%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = &#39;darkseagreen&#39;) +
+  facet_wrap(~ DriverInjury, ncol = 3) +
+  theme_dark() +
+  labs(title = &#39;Driver Injuries for Over vs. Within the Speed Limit*&#39;,
+       x = &#39;Driver Obeyed Speed Limit&#39;, y = &#39;Count&#39;,
+       caption = &#39;*Does Not Include &quot;No Injury&quot;&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="plot-5" class="section level3">
+<h3>Plot 5</h3>
+<pre class="r"><code>plotA &lt;- bicycle %&gt;% filter(DriverInjury == &#39;O: No Injury&#39;) %&gt;%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = &#39;darkseagreen&#39;) +
+  theme_dark() +
+  labs(y = &#39;Drivers - No Injures&#39;, x = NULL)
+
+plotB &lt;- bicycle %&gt;% filter(BikerInjury != &#39;O: No Injury&#39; &amp;
+                              BikerInjury != &#39;Unknown Injury&#39;) %&gt;%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = &#39;darkseagreen&#39;) +
+  theme_dark() +
+  labs(x = &#39;Driver Obeyed Speed Limit&#39;, 
+       y = &#39;Bicyclists - Any Injuries&#39;)
+
+plotA / plotB + plot_annotation(
+  title = &#39;Uninjured Drivers vs. Injured Bicyclist \n
+  When Speed Limit Obeyed vs. Not Obeyed&#39;
+)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="plot-6" class="section level3">
+<h3>Plot 6</h3>
+<pre class="r"><code>bicycle %&gt;% 
+  filter(CrashDate &gt;= &#39;2008-01-01&#39; &amp; CrashDate &lt;= &#39;2008-12-31&#39;) %&gt;%
+  ggplot(aes(CrashDate)) + 
+  geom_histogram() +
+  labs(title = &#39;Bicycle-Car Crashes by Date in 2008&#39;,
+       x = &#39;Date&#39;,
+       y = &#39;Number of Crashes&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="plot-7" class="section level3">
+<h3>Plot 7</h3>
+<p>ggplot(filter(bicycle, RoadCondition != ‘Dry’), aes(RoadCondition)) + geom_bar()</p>
+</div>
+<div id="plot-8" class="section level3">
+<h3>Plot 8</h3>
+<pre class="r"><code>ncmap &lt;- map_data(map = &#39;state&#39;, region = &#39;north carolina&#39;) %&gt;%
+  select(lon = long, lat, group, id = subregion)
+
+ggplot(ncmap, aes(lon, lat, group = group)) +
+  geom_polygon(fill = &#39;grey30&#39;, color = &#39;grey60&#39;)  +
+  geom_point(data = bicycle, mapping = aes(Lon, Lat, group = NULL), 
+             alpha = .25,
+             color = &#39;darkseagreen2&#39;) +
+  coord_quickmap() + 
+  theme_dark()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="plot-9" class="section level3">
+<h3>Plot 9</h3>
+<pre class="r"><code>nccounties &lt;- map_data(map = &#39;county&#39;, region = &#39;north carolina&#39;) %&gt;%
+  select(lon = long, lat, group, id = subregion)
+
+ggplot(nccounties, aes(lon, lat, group = group)) +
+  geom_polygon(fill = &#39;grey30&#39;, color = &#39;grey60&#39;)  +
+  geom_point(data = bicycle, mapping = aes(Lon, Lat, group = NULL),
+             alpha = .25,
+             color = &#39;darkseagreen2&#39;) +
+  coord_quickmap()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="plot-10" class="section level3">
+<h3>Plot 10</h3>
+<pre class="r"><code>states &lt;- st_as_sf(map(&#39;state&#39;, plot = FALSE, fill = TRUE))
+
+states &lt;- cbind(states, st_coordinates(st_centroid(states)))
+
+states$ID &lt;- toTitleCase(states$ID)
+
+ggplot() +
+  geom_sf(data = states, fill = &#39;grey30&#39;, size = 1.5, color = &#39;grey60&#39;) +
+  geom_point(data = bicycle, aes(Lon,Lat), 
+             alpha = .25,
+             color = &#39;darkseagreen2&#39;) +
+  geom_point(data = filter(bicycle,
+                           City == &#39;Winston-Salem&#39;),
+             aes(Lon,Lat),
+             color = &#39;orange&#39;,
+             size = 2, 
+             alpha = .5) +
+  geom_label(data = states, aes(X,Y,label = ID), 
+             fontface = &#39;bold&#39;, size = 5, alpha = .7) +
+  coord_sf(xlim = c(-84.75, -75), ylim = c(33.5, 37.5), expand = FALSE) +
+  annotate(geom = &#39;point&#39;,
+           x = -77.3, y = 33.9, color = &#39;orange&#39;, 
+           size = 2) +
+  annotate(geom = &#39;text&#39;, x = -77.1, y = 33.9, label = &#39;Winston-Salem&#39;,
+           hjust = &#39;left&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+<div id="shiny-apps" class="section level2">
+<h2>Shiny Apps</h2>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+</div>

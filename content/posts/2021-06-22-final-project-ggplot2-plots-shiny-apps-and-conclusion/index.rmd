@@ -1,0 +1,267 @@
+---
+title: 'Final Project: GGplot2 Plots, Shiny Apps, and Conclusion'
+author: ''
+date: '2021-06-22'
+slug: []
+categories: []
+tags: []
+---
+
+## GGplot 2 Plots
+
+### Setup
+```{r setup, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(sf)
+library(googleway)
+library(ggrepel)
+library(ggspatial)
+library(lwgeom)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
+library(tools)
+library(patchwork)
+
+bicycle <- read_delim('nc_bicycle_crash.csv', delim = ';',
+                      na = c('#NULL!', '', 'Unknown', 'NA'))
+
+bicycle <- bicycle %>%
+  transmute(
+    
+    City = city,
+    CrashDate = as.Date(crashdate, '%d%b%Y'),
+    
+    BikerAgeGroup = as.factor(bikeagegrp),
+    DriverAgeGroup = as.factor(drvragegrp),
+    
+    BikerAlcohol = as.factor(bikealcoho),
+    DriverAlcohol = as.factor(drvralcoho),
+    
+    BikerInjury = as.factor(bikeinjury),
+    DriverInjury = as.factor(drvrinjury),
+    
+    DriverVehicleType = as.factor(drvrvehtyp),
+    DriverEstimatedSpeed = as.factor(drvrestspd),
+    SpeedLimit = as.factor(speedlimit),
+    
+    RoadCondition = as.factor(rdconditio),
+    LightCondition = as.factor(lightcond),
+    
+    GeoPts = geo_point_2d
+    
+  )
+
+bicycle <- bicycle %>% 
+  separate(GeoPts, sep = ';',
+           into = c('Lat', 'Lon'), remove = TRUE)
+
+bicycle$Lon <- as.numeric(bicycle$Lon)
+bicycle$Lat <- as.numeric(bicycle$Lat)
+
+bicycle <- na.omit(bicycle)
+
+bicycle$MaxSpeed <- 0
+
+for (i in 1:length(bicycle$DriverEstimatedSpeed)){
+  if (bicycle$DriverEstimatedSpeed[i] == '0-5 mph' |
+      bicycle$DriverEstimatedSpeed[i] == '6-10 mph' |
+      bicycle$DriverEstimatedSpeed[i] == '11-15 mph' |
+      bicycle$DriverEstimatedSpeed[i] == '16-20 mph' |
+      bicycle$DriverEstimatedSpeed[i] == '21-25 mph'){
+    bicycle$MaxSpeed[i] <- 25 
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == '26-30 mph' |
+           bicycle$DriverEstimatedSpeed[i] == '31-35 mph' ){
+    bicycle$MaxSpeed[i] <- 35
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == '36-40 mph' |
+           bicycle$DriverEstimatedSpeed[i] == '41-45 mph' ){
+    bicycle$MaxSpeed[i] <- 45
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == '46-50 mph' |
+           bicycle$DriverEstimatedSpeed[i] == '51-55 mph' ){
+    bicycle$MaxSpeed[i] <- 55
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == '56-60 mph' |
+           bicycle$DriverEstimatedSpeed[i] == '61-65 mph' ){
+    bicycle$MaxSpeed[i] <- 65
+  }
+  else if (bicycle$DriverEstimatedSpeed[i] == '66-70 mph' |
+           bicycle$DriverEstimatedSpeed[i] == '71-75 mph' ){
+    bicycle$MaxSpeed[i] <- 75
+  }
+  else {
+    bicycle$MaxSpeed[i] <- '> 75'
+  }
+}
+
+bicycle$MaxSpeedLimit <- 0
+
+for (i in 1:length(bicycle$SpeedLimit)){
+  if (bicycle$SpeedLimit[i] == '20 - 25 MPH'){
+    bicycle$MaxSpeedLimit[i] <- 25 
+  }
+  else if (bicycle$SpeedLimit[i] == '30 - 35  MPH' ){
+    bicycle$MaxSpeedLimit[i] <- 35
+  }
+  else if (bicycle$SpeedLimit[i] == '40 - 45  MPH' ){
+    bicycle$MaxSpeedLimit[i] <- 45
+  }
+  else if (bicycle$SpeedLimit[i] == '50 - 55  MPH' ){
+    bicycle$MaxSpeedLimit[i] <- 55
+  }
+  else if (bicycle$SpeedLimit[i] == '60 - 65  MPH' ){
+    bicycle$MaxSpeedLimit[i] <- 65
+  }
+  else if (bicycle$SpeedLimit[i] == '70 - 75  MPH' ){
+    bicycle$MaxSpeedLimit[i] <- 75
+  }
+}
+
+bicycle <-
+  bicycle %>% 
+  mutate(ObeyingSpLimit = (bicycle$MaxSpeed == bicycle$MaxSpeedLimit)) 
+```
+
+### Plots 1 & 2
+```{r message = FALSE, warning = FALSE}
+bikeAgePlot <- ggplot(na.omit(bicycle), aes(BikerAgeGroup)) + 
+  geom_bar(aes(fill = BikerInjury), color = 'black') +
+  labs(title = 'Bicycle-Car Crashes by Bicyclist Age',
+       subtitle = 'Color-Coded by Bicyclist Injury',
+       y = 'Count', x = 'Age Group', fill = 'Injury Severity') +
+  theme_dark()
+
+drveAgePlot <- ggplot(na.omit(bicycle), aes(DriverAgeGroup)) + 
+  geom_bar(aes(fill = DriverInjury), color = 'black') +
+  labs(title = 'Bicycle-Car Crashes by Driver Age',
+       subtitle = 'Color-Coded by Driver Injury',
+       fill = 'Injury Severity',
+       y = 'Count', x = 'Age Group') +
+  theme_dark()
+
+bikeAgePlot / drveAgePlot + plot_layout(guides = 'collect')
+```
+
+### Plot 3
+```{r message = FALSE, warning = FALSE}
+ggplot(bicycle, aes(ObeyingSpLimit)) + 
+  geom_bar(fill = 'darkseagreen') +
+  facet_wrap(~ BikerInjury, ncol = 3) +
+  scale_y_continuous(breaks = c(100, 1:6 * 250)) +
+  theme_dark() +
+  labs(title = 'Bicyclist Injuries for Over vs. Within the Speed Limit',
+       x = 'Driver Obeyed Speed Limit', y = 'Count')
+```
+
+### Plot 4
+```{r message = FALSE, warning = FALSE}
+bicycle %>% filter(DriverInjury != 'O: No Injury') %>%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = 'darkseagreen') +
+  facet_wrap(~ DriverInjury, ncol = 3) +
+  theme_dark() +
+  labs(title = 'Driver Injuries for Over vs. Within the Speed Limit*',
+       x = 'Driver Obeyed Speed Limit', y = 'Count',
+       caption = '*Does Not Include "No Injury"')
+```
+
+### Plot 5
+```{r message = FALSE, warning = FALSE}
+plotA <- bicycle %>% filter(DriverInjury == 'O: No Injury') %>%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = 'darkseagreen') +
+  theme_dark() +
+  labs(y = 'Drivers - No Injures', x = NULL)
+
+plotB <- bicycle %>% filter(BikerInjury != 'O: No Injury' &
+                              BikerInjury != 'Unknown Injury') %>%
+  ggplot(aes(ObeyingSpLimit)) + 
+  geom_bar(fill = 'darkseagreen') +
+  theme_dark() +
+  labs(x = 'Driver Obeyed Speed Limit', 
+       y = 'Bicyclists - Any Injuries')
+
+plotA / plotB + plot_annotation(
+  title = 'Uninjured Drivers vs. Injured Bicyclist \n
+  When Speed Limit Obeyed vs. Not Obeyed'
+)
+```
+
+### Plot 6
+```{r message = FALSE, warning = FALSE}
+bicycle %>% 
+  filter(CrashDate >= '2008-01-01' & CrashDate <= '2008-12-31') %>%
+  ggplot(aes(CrashDate)) + 
+  geom_histogram() +
+  labs(title = 'Bicycle-Car Crashes by Date in 2008',
+       x = 'Date',
+       y = 'Number of Crashes')
+```
+
+### Plot 7
+ggplot(filter(bicycle, RoadCondition != 'Dry'), aes(RoadCondition)) + geom_bar()
+
+### Plot 8
+
+```{r message = FALSE, warning = FALSE}
+ncmap <- map_data(map = 'state', region = 'north carolina') %>%
+  select(lon = long, lat, group, id = subregion)
+
+ggplot(ncmap, aes(lon, lat, group = group)) +
+  geom_polygon(fill = 'grey30', color = 'grey60')  +
+  geom_point(data = bicycle, mapping = aes(Lon, Lat, group = NULL), 
+             alpha = .25,
+             color = 'darkseagreen2') +
+  coord_quickmap() + 
+  theme_dark()
+```
+
+### Plot 9 
+```{r message = FALSE, warning = FALSE}
+nccounties <- map_data(map = 'county', region = 'north carolina') %>%
+  select(lon = long, lat, group, id = subregion)
+
+ggplot(nccounties, aes(lon, lat, group = group)) +
+  geom_polygon(fill = 'grey30', color = 'grey60')  +
+  geom_point(data = bicycle, mapping = aes(Lon, Lat, group = NULL),
+             alpha = .25,
+             color = 'darkseagreen2') +
+  coord_quickmap()
+```
+
+### Plot 10
+```{r message = FALSE, warning = FALSE}
+states <- st_as_sf(map('state', plot = FALSE, fill = TRUE))
+
+states <- cbind(states, st_coordinates(st_centroid(states)))
+
+states$ID <- toTitleCase(states$ID)
+
+ggplot() +
+  geom_sf(data = states, fill = 'grey30', size = 1.5, color = 'grey60') +
+  geom_point(data = bicycle, aes(Lon,Lat), 
+             alpha = .25,
+             color = 'darkseagreen2') +
+  geom_point(data = filter(bicycle,
+                           City == 'Winston-Salem'),
+             aes(Lon,Lat),
+             color = 'orange',
+             size = 2, 
+             alpha = .5) +
+  geom_label(data = states, aes(X,Y,label = ID), 
+             fontface = 'bold', size = 5, alpha = .7) +
+  coord_sf(xlim = c(-84.75, -75), ylim = c(33.5, 37.5), expand = FALSE) +
+  annotate(geom = 'point',
+           x = -77.3, y = 33.9, color = 'orange', 
+           size = 2) +
+  annotate(geom = 'text', x = -77.1, y = 33.9, label = 'Winston-Salem',
+           hjust = 'left')
+```
+
+## Shiny Apps
+
+
+
+## Conclusion
