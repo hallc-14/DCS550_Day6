@@ -147,7 +147,7 @@ bikeAgePlot / drveAgePlot + plot_layout(guides = 'collect')
 ### Plot 3
 ```{r message = FALSE, warning = FALSE}
 ggplot(bicycle, aes(ObeyingSpLimit)) + 
-  geom_bar(fill = 'darkseagreen') +
+  geom_bar(fill = 'darkseagreen1') +
   facet_wrap(~ BikerInjury, ncol = 3) +
   scale_y_continuous(breaks = c(100, 1:6 * 250)) +
   theme_dark() +
@@ -159,7 +159,7 @@ ggplot(bicycle, aes(ObeyingSpLimit)) +
 ```{r message = FALSE, warning = FALSE}
 bicycle %>% filter(DriverInjury != 'O: No Injury') %>%
   ggplot(aes(ObeyingSpLimit)) + 
-  geom_bar(fill = 'darkseagreen') +
+  geom_bar(fill = 'darkseagreen3') +
   facet_wrap(~ DriverInjury, ncol = 3) +
   theme_dark() +
   labs(title = 'Driver Injuries for Over vs. Within the Speed Limit*',
@@ -201,7 +201,14 @@ bicycle %>%
 ```
 
 ### Plot 7
-ggplot(filter(bicycle, RoadCondition != 'Dry'), aes(RoadCondition)) + geom_bar()
+```{r message = FALSE, warning = FALSE}
+ggplot(filter(bicycle, RoadCondition != 'Dry'), aes(RoadCondition)) + geom_bar(fill = 'darkseagreen2') + 
+  labs(title = 'Bicycle Crashes by Road Condition',
+       caption = 'Does not include "Dry"',
+       x = 'Road Condition',
+       y = 'Count') +
+  theme_dark()
+```
 
 ### Plot 8
 
@@ -262,8 +269,8 @@ ggplot() +
 
 ## Shiny Apps
 
-### App 1
+### Organized by Tabs
 
-<iframe src= "https://hallc.shinyapps.io/bicycle1/" width = "1100" height = "1200" style = "border:none;"></iframe>
+<iframe src= "https://hallc.shinyapps.io/bicycle1/" width = "1200" height = "1200" style = "border:none;"></iframe>
 
 ## Conclusion

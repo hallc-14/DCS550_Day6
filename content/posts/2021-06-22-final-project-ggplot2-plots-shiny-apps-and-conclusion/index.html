@@ -148,7 +148,7 @@ bikeAgePlot / drveAgePlot + plot_layout(guides = &#39;collect&#39;)</code></pre>
 <div id="plot-3" class="section level3">
 <h3>Plot 3</h3>
 <pre class="r"><code>ggplot(bicycle, aes(ObeyingSpLimit)) + 
-  geom_bar(fill = &#39;darkseagreen&#39;) +
+  geom_bar(fill = &#39;darkseagreen1&#39;) +
   facet_wrap(~ BikerInjury, ncol = 3) +
   scale_y_continuous(breaks = c(100, 1:6 * 250)) +
   theme_dark() +
@@ -160,7 +160,7 @@ bikeAgePlot / drveAgePlot + plot_layout(guides = &#39;collect&#39;)</code></pre>
 <h3>Plot 4</h3>
 <pre class="r"><code>bicycle %&gt;% filter(DriverInjury != &#39;O: No Injury&#39;) %&gt;%
   ggplot(aes(ObeyingSpLimit)) + 
-  geom_bar(fill = &#39;darkseagreen&#39;) +
+  geom_bar(fill = &#39;darkseagreen3&#39;) +
   facet_wrap(~ DriverInjury, ncol = 3) +
   theme_dark() +
   labs(title = &#39;Driver Injuries for Over vs. Within the Speed Limit*&#39;,
@@ -203,7 +203,13 @@ plotA / plotB + plot_annotation(
 </div>
 <div id="plot-7" class="section level3">
 <h3>Plot 7</h3>
-<p>ggplot(filter(bicycle, RoadCondition != ‘Dry’), aes(RoadCondition)) + geom_bar()</p>
+<pre class="r"><code>ggplot(filter(bicycle, RoadCondition != &#39;Dry&#39;), aes(RoadCondition)) + geom_bar(fill = &#39;darkseagreen2&#39;) + 
+  labs(title = &#39;Bicycle Crashes by Road Condition&#39;,
+       caption = &#39;Does not include &quot;Dry&quot;&#39;,
+       x = &#39;Road Condition&#39;,
+       y = &#39;Count&#39;) +
+  theme_dark()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="plot-8" class="section level3">
 <h3>Plot 8</h3>
@@ -217,7 +223,7 @@ ggplot(ncmap, aes(lon, lat, group = group)) +
              color = &#39;darkseagreen2&#39;) +
   coord_quickmap() + 
   theme_dark()</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
 <div id="plot-9" class="section level3">
 <h3>Plot 9</h3>
@@ -230,7 +236,7 @@ ggplot(nccounties, aes(lon, lat, group = group)) +
              alpha = .25,
              color = &#39;darkseagreen2&#39;) +
   coord_quickmap()</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="plot-10" class="section level3">
 <h3>Plot 10</h3>
@@ -259,14 +265,14 @@ ggplot() +
            size = 2) +
   annotate(geom = &#39;text&#39;, x = -77.1, y = 33.9, label = &#39;Winston-Salem&#39;,
            hjust = &#39;left&#39;)</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 </div>
 <div id="shiny-apps" class="section level2">
 <h2>Shiny Apps</h2>
-<div id="app-1" class="section level3">
-<h3>App 1</h3>
-<iframe src="https://hallc.shinyapps.io/bicycle1/" width="1100" height="1200" style="border:none;">
+<div id="organized-by-tabs" class="section level3">
+<h3>Organized by Tabs</h3>
+<iframe src="https://hallc.shinyapps.io/bicycle1/" width="1200" height="1200" style="border:none;">
 </iframe>
 </div>
 </div>
