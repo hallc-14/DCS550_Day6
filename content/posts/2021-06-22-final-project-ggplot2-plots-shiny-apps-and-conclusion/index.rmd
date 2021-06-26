@@ -264,6 +264,7 @@ ggplot() +
 
 ### App 1
 
-<iframe src= "https://hallc.shinyapps.io/bicycle1/"></iframe>
+<iframe src= "https://hallc.shinyapps.io/bicycle1/" width = "800" 
+height = "600" style = "border:none;"></iframe>
 
 ## Conclusion
