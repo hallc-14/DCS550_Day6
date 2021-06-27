@@ -7,6 +7,8 @@ categories: ['Shiny','DCS 550']
 tags: ['Shiny']
 ---
 
+another test
+
 ### Exercise 1
 
 **Graph of 4.4**
