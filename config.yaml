@@ -27,4 +27,3 @@ params:
     - icon: twitter
       name: Twitter
       url: https://twitter.com/gohugoio
-ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
