@@ -1,10 +1,10 @@
 ---
-title: Shiny Example 1
+title: "Shiny Example 1"
 author: ''
 date: '2021-06-01'
 slug: []
-categories: []
 tags: []
+categories: []
 ---
 
 <iframe src= "https://hallc.shinyapps.io/dcs_example_1/" width = "800" 
