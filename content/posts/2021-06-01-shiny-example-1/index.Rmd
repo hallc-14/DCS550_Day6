@@ -1,12 +1,15 @@
 ---
-title: Shiny Example 1
-author: ''
+title: "Shiny Example 1"
+author: 'Charlie'
 date: '2021-06-01'
-slug: []
-categories: []
-tags: []
+slug: ['slg']
+tags: ['tag']
+categories: ['cat']
 ---
 
 <iframe src= "https://hallc.shinyapps.io/dcs_example_1/" width = "800" 
 height = "600" style = "border:none;"></iframe>
 
+THIS IS A TEST
+
+shiny 1
