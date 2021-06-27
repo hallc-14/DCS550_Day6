@@ -10,6 +10,10 @@ categories: ['cat']
 <iframe src= "https://hallc.shinyapps.io/dcs_example_1/" width = "800" 
 height = "600" style = "border:none;"></iframe>
 
+<<<<<<< HEAD
 THIS IS A TEST
 
 shiny 1
+=======
+test
+>>>>>>> f91e8ca
